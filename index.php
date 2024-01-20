@@ -31,6 +31,11 @@
           <input type="password" name="password" placeholder="Enter new password" required>
           <i class="fas fa-eye"></i>
         </div>
+        <div class="field input">
+          <label>Confirm Password</label>
+          <input type="password" name="confirm_password" placeholder="Confirm password" required>
+          <i class="fas fa-eye"></i>
+        </div>
         <div class="field image">
           <label>Select Image</label>
           <input type="file" name="image" accept="image/x-png,image/gif,image/jpeg,image/jpg" required>
@@ -45,6 +50,5 @@
 
   <script src="javascript/pass-show-hide.js"></script>
   <script src="javascript/signup.js"></script>
-
 </body>
 </html>

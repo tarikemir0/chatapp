@@ -1,12 +1,22 @@
-const pswrdField = document.querySelector(".form input[type='password']"),
-toggleIcon = document.querySelector(".form .field i");
+const passwordField = document.querySelector(".form input[name='password']");
+const confirmField = document.querySelector(".form input[name='confirm_password']");
+const toggleIconPassword = document.querySelector(".form .field input[name='password'] + i");
+const toggleIconConfirm = document.querySelector(".form .field input[name='confirm_password'] + i");
 
-toggleIcon.onclick = () =>{
-  if(pswrdField.type === "password"){
-    pswrdField.type = "text";
+function togglePasswordVisibility(field, toggleIcon) {
+  if (field.type === "password") {
+    field.type = "text";
     toggleIcon.classList.add("active");
-  }else{
-    pswrdField.type = "password";
+  } else {
+    field.type = "password";
     toggleIcon.classList.remove("active");
   }
+}
+
+toggleIconPassword.onclick = () => {
+  togglePasswordVisibility(passwordField, toggleIconPassword);
+}
+
+toggleIconConfirm.onclick = () => {
+  togglePasswordVisibility(confirmField, toggleIconConfirm);
 }
