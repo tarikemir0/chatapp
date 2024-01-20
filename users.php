@@ -23,10 +23,16 @@
             <p><?php echo $row['status']; ?></p>
           </div>
         </div>
-        <a href="php/logout.php?logout_id=<?php echo $row['unique_id']; ?>" class="logout">Logout</a>
+        <button onclick="window.location.href='profil.php'" class="profil" style="  width: 80px;
+  height: 80px;
+  border: none;
+  background: none;
+  outline: none;
+  cursor:pointer"><i class="fa-solid fa-gears" style="font-size: 25px;"></i></button>
+        <a href="php/logout.php?logout_id=<?php echo $row['unique_id']; ?>" class="logout">Çıkış</a>
       </header>
       <div class="search">
-        <span class="text">Select an user to start chat</span>
+        <span class="text">Sohbete başla..</span>
         <input type="text" placeholder="Enter name to search...">
         <button><i class="fas fa-search"></i></button>
       </div>
@@ -37,6 +43,9 @@
   </div>
 
   <script src="javascript/users.js"></script>
+
+
+
 
 </body>
 </html>
