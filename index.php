@@ -45,6 +45,7 @@
         </div>
       </form>
       <div class="link">Already signed up? <a href="login.php">Login now</a></div>
+      <div class="link">Already signed up? <a href="Sifre_yenileme/sifremi_unuttum.php">sifre unuttum</a></div>
     </section>
   </div>
 
