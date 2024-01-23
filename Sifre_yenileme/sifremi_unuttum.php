@@ -1,4 +1,9 @@
 <?php
+$conn = new mysqli("localhost", "root", "", "chatapp");
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
+}
+
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
@@ -7,7 +12,8 @@ require 'C:\xampp\htdocs\chatapp\vendor\phpmailer\phpmailer\src\Exception.php';
 require 'C:\xampp\htdocs\chatapp\vendor\phpmailer\phpmailer\src\PHPMailer.php';
 require 'C:\xampp\htdocs\chatapp\vendor\phpmailer\phpmailer\src\SMTP.php';
 
-include_once dirname(__DIR__) . "/php/config.php";
+require  'C:\xampp\htdocs\CHatapp\vendor\autoload.php';
+ 
 
 $message = '';
 
@@ -23,10 +29,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $reset_token = md5(uniqid(rand(), true));
 
             // Şifre sıfırlama bağlantısını veritabanına kaydet
-            mysqli_query($conn, "UPDATE users SET reset_token = '$reset_token' WHERE email = '$email'");
+            mysqli_query($conn, "UPDATE users SET verification_code = '$reset_token' WHERE email = '$email'");
 
             // Kullanıcıya e-posta ile şifre sıfırlama bağlantısı gönder
-            $reset_link = "http://chatapp/reset-password.php?reset_token=$reset_token";
+            $reset_link = "http://chatapp/reset-password.php?verification_code=$reset_token";
             $to = $user['email']; // Kullanıcının e-posta adresi
 
             $mail = new PHPMailer(true); // Hata ayıklama modu etkinleştirildi
@@ -82,6 +88,54 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Şifre Sıfırlama</title>
 </head>
+<style>
+    body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+}
+
+.container {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+label {
+    margin-bottom: 10px;
+}
+
+input {
+    padding: 10px;
+    margin-bottom: 15px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+button {
+    background-color: #3498db;
+    color: #fff;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #2980b9;
+}
+</style>
 <body>
     <div>
         <?php echo $message; ?>
@@ -91,6 +145,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <label for="email">E-posta:</label>
         <input type="email" name="email" id="email" required>
         <button type="submit">Şifre Sıfırlama Bağlantısı Gönder</button>
+        <a href="reset-password.php">ŞİFRE YENİLEME YERİNE GİT</a>
     </form>
 </body>
 </html>

@@ -1,70 +1,104 @@
 <?php
-include_once dirname(__DIR__) . "/php/config.php"; // Veritabanı bağlantısı için config dosyasını ekleyin
+$message = '';
 
-// Veritabanına bağlanma
-$conn = mysqli_connect(DB_HOST, DB_USER, DB_PASSWORD, DB_NAME);
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    // Veritabanı bağlantısını yapın
+    $conn = new mysqli("localhost", "root", "", "chatapp");
+    if ($conn->connect_error) {
+        die("Connection failed: " . $conn->connect_error);
+    }
 
-// Bağlantıyı kontrol et
-if (!$conn) {
-    die("Veritabanı bağlantısı başarısız: " . mysqli_connect_error());
-}
+    $verificationCode = mysqli_real_escape_string($conn, $_POST["verificationCode"]);
+    $newPassword = mysqli_real_escape_string($conn, $_POST["newPassword"]);
 
-if ($_SERVER["REQUEST_METHOD"] == "GET" && isset($_GET["token"])) {
-    $token = mysqli_real_escape_string($conn, $_GET["token"]);
-
-    $user_query = mysqli_query($conn, "SELECT * FROM users WHERE reset_token = '$token' LIMIT 1");
+    // Doğrulama kodunu kontrol et
+    $user_query = mysqli_query($conn, "SELECT * FROM users WHERE verification_code = '$verificationCode' LIMIT 1");
 
     if (mysqli_num_rows($user_query) > 0) {
-        // Kullanıcı doğrulandı, yeni şifre girme formunu göster
-        $user = mysqli_fetch_assoc($user_query);  // Kullanıcı verilerini al
+        $user = mysqli_fetch_assoc($user_query);
 
-        ?>
-        <!DOCTYPE html>
-        <html lang="en">
-        <head>
-            <meta charset="UTF-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>Yeni Şifre Oluştur</title>
-        </head>
-        <body>
-            <form action="reset-password.php" method="post">
-                <label for="new_password">Yeni Şifreniz:</label>
-                <input type="password" name="new_password" required>
+        // Yeni şifreyi veritabanına kaydet
+        $hashedPassword = password_hash($newPassword, PASSWORD_DEFAULT);
+        mysqli_query($conn, "UPDATE users SET password = '$hashedPassword', verification_code = NULL WHERE unique_id= {$user['unique_id']}");
 
-                <label for="confirm_password">Şifrenizi Tekrar Girin:</label>
-                <input type="password" name="confirm_password" required>
-
-                <input type="hidden" name="token" value="<?= $token ?>">
-                <input type="hidden" name="user_id" value="<?= $user['unique_id'] ?>">
-                <input type="submit" value="Şifreyi Güncelle">
-            </form>
-        </body>
-        </html>
-        <?php
+        $message = "<div>Şifreniz başarıyla güncellendi.</div>";
     } else {
-        echo "Geçersiz veya süresi dolmuş bağlantı.";
+        $message = "<div>Geçersiz doğrulama kodu.</div>";
     }
-} elseif ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["new_password"], $_POST["token"], $_POST["confirm_password"])) {
-    $new_password = mysqli_real_escape_string($conn, $_POST["new_password"]);
-    $confirm_password = mysqli_real_escape_string($conn, $_POST["confirm_password"]);
-    $token = mysqli_real_escape_string($conn, $_POST["token"]);
-    $user_id = mysqli_real_escape_string($conn, $_POST["user_id"]);
 
-    if ($new_password === $confirm_password) {
-        // Şifreler eşleşiyorsa devam et
-        // Şifre sıfırlama bağlantısını geçersiz kıl
-        mysqli_query($conn, "UPDATE users SET reset_token = NULL WHERE reset_token = '$token'");
+    // Veritabanı bağlantısını kapat
+    $conn->close();
+}
+?>
 
-        // Yeni şifreyi güvenli bir şekilde veritabanına kaydet
-        $hashed_password = password_hash($new_password, PASSWORD_DEFAULT);
-        mysqli_query($conn, "UPDATE users SET password = '$hashed_password' WHERE unique_id = '$user_id'");
-
-        echo "Şifreniz başarıyla güncellendi. Yeni şifrenizle giriş yapabilirsiniz.";
-    } else {
-        echo "Şifreler eşleşmiyor. Lütfen aynı şifreyi girin.";
-    }
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Şifre Sıfırlama</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<style>body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
 }
 
-// Veritabanı bağlantısını kapat
-mysqli_close($conn);
-?>
+.container {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+label {
+    margin-bottom: 10px;
+}
+
+input {
+    padding: 10px;
+    margin-bottom: 15px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+button {
+    background-color: #3498db;
+    color: #fff;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #2980b9;
+}
+</style>
+<body>
+    <div class="container">
+        <?php echo $message; ?>
+
+        <form action="" method="post">
+            <label for="verificationCode">Doğrulama Kodu:</label>
+            <input type="text" name="verificationCode" required>
+
+            <label for="newPassword">Yeni Şifre:</label>
+            <input type="password" name="newPassword" required>
+
+            <button type="submit">Şifreyi Değiştir</button>
+        </form>
+    </div>
+</body>
+</html>
