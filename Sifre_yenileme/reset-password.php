@@ -12,14 +12,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $newPassword = mysqli_real_escape_string($conn, $_POST["newPassword"]);
 
     // Doğrulama kodunu kontrol et
-    $user_query = mysqli_query($conn, "SELECT * FROM users WHERE verification_code = '$verificationCode' LIMIT 1");
+    $user_query = mysqli_query($conn, "SELECT * FROM users WHERE reset_token = '$verificationCode' LIMIT 1");
 
     if (mysqli_num_rows($user_query) > 0) {
         $user = mysqli_fetch_assoc($user_query);
 
-        // Yeni şifreyi veritabanına kaydet
-        $hashedPassword = password_hash($newPassword, PASSWORD_DEFAULT);
-        mysqli_query($conn, "UPDATE users SET password = '$hashedPassword', verification_code = NULL WHERE unique_id= {$user['unique_id']}");
+        // Yeni şifreyi MD5 ile şifreleyerek veritabanına kaydet
+        $hashedPassword = md5($newPassword);
+        mysqli_query($conn, "UPDATE users SET password = '$hashedPassword', reset_token = NULL WHERE unique_id= {$user['unique_id']}");
 
         $message = "<div>Şifreniz başarıyla güncellendi.</div>";
     } else {
@@ -39,7 +39,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <title>Şifre Sıfırlama</title>
     <link rel="stylesheet" href="styles.css">
 </head>
-<style>body {
+<style>
+body {
     font-family: Arial, sans-serif;
     background-color: #f4f4f4;
     margin: 0;

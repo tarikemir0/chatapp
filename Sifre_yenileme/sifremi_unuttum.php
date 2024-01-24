@@ -29,10 +29,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $reset_token = md5(uniqid(rand(), true));
 
             // Şifre sıfırlama bağlantısını veritabanına kaydet
-            mysqli_query($conn, "UPDATE users SET verification_code = '$reset_token' WHERE email = '$email'");
+            mysqli_query($conn, "UPDATE users SET reset_token = '$reset_token' WHERE email = '$email'");
 
             // Kullanıcıya e-posta ile şifre sıfırlama bağlantısı gönder
-            $reset_link = "http://chatapp/reset-password.php?verification_code=$reset_token";
+            $reset_link = "http://chatapp/reset-password.php?reset_token=$reset_token";
             $to = $user['email']; // Kullanıcının e-posta adresi
 
             $mail = new PHPMailer(true); // Hata ayıklama modu etkinleştirildi
